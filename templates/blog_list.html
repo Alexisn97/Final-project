@@ -1,19 +1,55 @@
 {% extends 'base.html' %}
+{% load static %}
+
 {% block content %}
-  <h2>Blog Posts</h2>
-  <a href="{% url 'blog_create' %}" class="btn btn-success mb-3">➕ Create New Blog</a>
-  {% for blog in blogs %}
-    <div class="card mb-3">
-      <div class="card-body">
-        <h4>{{ blog.title }}</h4>
-        <p>{{ blog.content|linebreaks }}</p>
-        <small>By {{ blog.author }} on {{ blog.created_at }}</small>
-        <br>
-        <a href="{% url 'blog_edit' blog.id %}" class="btn btn-warning btn-sm">Edit</a>
-        <a href="{% url 'blog_delete' blog.id %}" class="btn btn-danger btn-sm">Delete</a>
+  <div class="container mt-4">
+    <h2 class="text-center mb-4">📝 Blog Posts</h2>
+
+    {% if user.is_authenticated %}
+      <div class="text-end mb-4">
+        <a href="{% url 'blog_create' %}" class="btn btn-success btn-lg shadow">
+          ➕ Create New Blog
+        </a>
       </div>
-    </div>
-  {% empty %}
-    <p>No blog posts yet.</p>
-  {% endfor %}
+    {% endif %}
+
+    {% for blog in blogs %}
+      <div class="card mb-4 shadow-sm border-primary">
+        <div class="row g-0">
+          {% if blog.picture %}
+            <div class="col-md-4">
+              <img src="{{ blog.picture.url }}" class="img-fluid rounded-start" alt="{{ blog.title }}">
+            </div>
+          {% endif %}
+          <div class="col-md-8">
+            <div class="card-body">
+              <h4 class="card-title text-primary">{{ blog.title }}</h4>
+              {% if blog.description %}
+                <p class="card-text"><em>{{ blog.description }}</em></p>
+              {% endif %}
+              <p class="card-text">{{ blog.content|linebreaks }}</p>
+              <p class="text-muted small mb-2">
+                🖋️ By <strong>{{ blog.author }}</strong> on {{ blog.created_at|date:"F d, Y" }}
+              </p>
+
+              {% if user.is_authenticated and blog.author == user %}
+                <div class="d-flex gap-2">
+                  <a href="{% url 'blog_edit' blog.id %}" class="btn btn-outline-warning btn-sm">
+                    ✏️ Edit
+                  </a>
+                  <a href="{% url 'blog_delete' blog.id %}" class="btn btn-outline-danger btn-sm">
+                    🗑️ Delete
+                  </a>
+                </div>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+    {% empty %}
+      <div class="alert alert-info text-center">
+        <strong>No blog posts yet.</strong> Be the first to create one!
+      </div>
+    {% endfor %}
+  </div>
 {% endblock %}
